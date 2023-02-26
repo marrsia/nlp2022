@@ -325,7 +325,7 @@ def plot_normalized(corpus, words):
     M_lengths = np.linalg.norm(M_reduced_co_occurrence, axis=1)
     M_normalized = M_reduced_co_occurrence / M_lengths[:, np.newaxis] # broadcasting
     plot_embeddings(M_normalized, word2Ind_co_occurrence, words, True, 'plot_normalized')
-
+'''
 pl_corpus = read_corpus_pl()
 words = [
     "sztuka", "śpiewaczka", "literatura", "poeta", "obywatel"]
@@ -333,7 +333,7 @@ words = [
 plot_normalized(pl_corpus, words) #TODO: describe plot
 plot_unnormalized(pl_corpus, words) #TODO: describe plot
 
-
+'''
 #################################
 # Section 2:
 #################################
@@ -391,12 +391,14 @@ def get_matrix_of_vectors(wv_from_bin, required_words):
 
 #################################
 # TODO: a)
-M, word2Ind = get_matrix_of_vectors(wv_from_bin_pl, words)
-M_reduced = reduce_to_k_dim(M, k=2)
-
 words = [
     "sztuka", "śpiewaczka", "literatura", "poeta", "artystyczny", "obywatel"]
-plot_embeddings(M_reduced, word2Ind, words, True, 'word2vec_plot')
+
+M_wv_pl, word2Ind_wv_pl = get_matrix_of_vectors(wv_from_bin_pl, words)
+M_reduced = reduce_to_k_dim(M_wv_pl, k=2)
+
+
+plot_embeddings(M_reduced, word2Ind_wv_pl, words, True, 'word2vec_plot')
 
 
 #################################
@@ -413,14 +415,15 @@ def polysemeous_exploration(word):
         print(i, key, similarity)
 
 polysemeous_exploration("stówa")
-polysemeous_exploration("niebo")
-polysemeous_exploration("myszka")
-polysemeous_exploration("klawisz")
-polysemeous_exploration("herbatnik")
-polysemeous_exploration("biegać")
-polysemeous_exploration("kobieta")
-polysemeous_exploration("mężczyzna")
-polysemeous_exploration("medycyna")
+#polysemeous_exploration("myszka") # expected computer and animal, got only animal
+#polysemeous_exploration("pączek") expected desserts, got fruits and plant parts
+#polysemeous_exploration("zamek") expected results for castle and zip, got only castle
+#polysemeous_exploration("para") expected steam and couple/two, got only couple /two
+#polysemeous_exploration("pokój") expected room and peace, got room
+polysemeous_exploration("blok") # sucescc! - got both building-related and cube related words
+#polysemeous_exploration("język") # hoped for tounge and language, got only language (and little hedgehog)
+#polysemeous_exploration("pilot") only pilot, not remote
+#polysemeous_exploration("kanar") hoped for bird and ticket checking person, somehow got neither
 # ------------------
 
 #################################
@@ -428,16 +431,29 @@ polysemeous_exploration("medycyna")
 # Synonyms & Antonyms
 # ------------------
 # Write your synonym & antonym exploration code here.
+def synonym_antonym_exploration(w1, w2, w3):
+    w1_w2_dist = wv_from_bin_pl.distance(w1, w2)
+    w1_w3_dist = wv_from_bin_pl.distance(w1, w3)
 
+    print("Synonyms {}, {} have cosine distance: {}".format(w1, w2, w1_w2_dist))
+    print("Antonyms {}, {} have cosine distance: {}".format(w1, w3, w1_w3_dist))
 w1 = "radosny"
 w2 = "pogodny"
 w3 = "smutny"
-w1_w2_dist = wv_from_bin_pl.distance(w1, w2)
-w1_w3_dist = wv_from_bin_pl.distance(w1, w3)
 
-print("Synonyms {}, {} have cosine distance: {}".format(w1, w2, w1_w2_dist))
-print("Antonyms {}, {} have cosine distance: {}".format(w1, w3, w1_w3_dist))
+w1 = "mały"
+w2 = "drobny"
+w3 = "duży"
 
+synonym_antonym_exploration("radosny", "pogodny", "smutny")
+
+synonym_antonym_exploration("mały", "drobny", "duży")
+
+synonym_antonym_exploration("chudy", "wysmukły", "gruby")
+
+synonym_antonym_exploration("jasny", "świetlisty", "ciemny")
+# why - the antonyms I used are the most 'basic' words describing a certain quality (for exaple size)
+# the synonym I used is a word that describes that quality but is less commonly used and conveys some additional meanings:
 quit()
 #################################
 # TODO: d)
