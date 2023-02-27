@@ -21,7 +21,7 @@ import numpy as np
 import scipy as sp
 from nltk.corpus import reuters
 from nltk.corpus.reader import pl196x
-#from sklearn.decomposition import PCA, TruncatedSVD
+from sklearn.decomposition import PCA, TruncatedSVD
 
 START_TOKEN = '<START>'
 END_TOKEN = '<END>'
@@ -49,8 +49,7 @@ def distinct_words(corpus):
     words_set = set()
     for doc in corpus:
         for word in doc:
-            words_set.add(word.lower())
-    print(words_set)
+            words_set.add(word)
     corpus_words = sorted(list(words_set))
     corpus_words.sort()
     num_corpus_words = len(corpus_words)
@@ -65,15 +64,14 @@ def distinct_words(corpus):
 # ---------------------
 
 # Define toy corpus
-test_corpus = ["START Ala miec kot i pies END".split(" "),
-               "START Ala lubic kot END".split(" ")]
+test_corpus = ["START ala miec kot i pies END".split(" "),
+               "START ala lubic kot END".split(" ")]
 
 test_corpus_words, num_corpus_words = distinct_words(test_corpus)
 
 # Correct answers
 ans_test_corpus_words = sorted(list(set([
-    'Ala', 'END', 'START', 'i', 'kot', 'lubic', 'miec', 'pies'])))
-ans_test_corpus_words = sorted([w.lower() for w in ans_test_corpus_words])
+    'ala', 'END', 'START', 'i', 'kot', 'lubic', 'miec', 'pies'])))
 ans_num_corpus_words = len(ans_test_corpus_words)
 
 # Test correct number of words
@@ -118,7 +116,7 @@ def compute_co_occurrence_matrix(corpus, window_size=4):
     # Write your implementation here.
     for i in range(num_words):
         word2Ind[words[i]] = i
-    print(word2Ind)
+
     for doc in corpus:
         for base_ind in range(len(doc)):
             begin = max(base_ind - window_size, 0)
@@ -137,27 +135,25 @@ def compute_co_occurrence_matrix(corpus, window_size=4):
 # ---------------------
 
 # Define toy corpus and get student's co-occurrence matrix
-test_corpus = ["start ala miec kot i pies end".split(" "),
-               "start ala lubic kot end".split(" ")]
+test_corpus = ["START ala miec kot i pies END".split(" "),
+               "START ala lubic kot END".split(" ")]
 
 M_test, word2Ind_test = compute_co_occurrence_matrix(
     test_corpus, window_size=1)
 
 # Correct M and word2Ind
 M_test_ans = np.array([
-    [0., 0., 0., 0., 1., 1., 0., 2.],
-    [0., 0., 0., 1., 0., 0., 1., 0.],
-    [0., 0., 0., 1., 0., 0., 1., 0.],
-    [0., 1., 1., 0., 1., 1., 0., 0.],
-    [1., 0., 0., 1., 0., 0., 0., 0.],
-    [1., 0., 0., 1., 0., 0., 0., 0.],
-    [0., 1., 1., 0., 0., 0., 0., 0.],
-    [2., 0., 0., 0., 0., 0., 0., 0.]
+    [0., 0., 0., 0., 1., 0., 0., 1.],
+    [0., 0., 2., 0., 0., 0., 0., 0.],
+    [0., 2., 0., 0., 0., 1., 1., 0.],
+    [0., 0., 0., 0., 1., 0., 0., 1.],
+    [1., 0., 0., 1., 0., 1., 1., 0.],
+    [0., 0., 1., 0., 1., 0., 0., 0.],
+    [0., 0., 1., 0., 1., 0., 0., 0.],
+    [1., 0., 0., 1., 0., 0., 0., 0.]
 ])
 
-word2Ind_ans = {
-    'ala': 0, 'end': 1, 'i': 2, 'kot': 3, 'lubic': 4, 'miec': 5, 'pies': 6,
-    'start': 7}
+word2Ind_ans = {'END': 0, 'START': 1, 'ala': 2, 'i': 3, 'kot': 4, 'lubic': 5, 'miec': 6, 'pies': 7}
 
 # Test correct word2Ind
 assert (word2Ind_ans == word2Ind_test), "Your word2Ind is incorrect:\nCorrect: {}\nYours: {}".format(word2Ind_ans, word2Ind_test)
@@ -181,10 +177,9 @@ for w1 in word2Ind_ans.keys():
 
 # Print Success
 print ("-" * 80)
-print("Passed All Tests!")
+print("Passed All Matrix Tests!")
 print ("-" * 80)
 
-quit()
 #################################
 # TODO: c)
 def reduce_to_k_dim(M, k=2):
@@ -209,6 +204,8 @@ def reduce_to_k_dim(M, k=2):
 
     # ------------------
     # Write your implementation here.
+    svd = TruncatedSVD(n_components=k, n_iter=n_iters, random_state=42)
+    M_reduced = svd.fit_transform(M)
     # ------------------
 
     print("Done.")
@@ -221,8 +218,8 @@ def reduce_to_k_dim(M, k=2):
 # ---------------------
 
 # Define toy corpus and run student code
-test_corpus = ["START Ala miec kot i pies END".split(" "),
-               "START Ala lubic kot END".split(" ")]  
+test_corpus = ["START ala miec kot i pies END".split(" "),
+               "START ala lubic kot END".split(" ")]
 M_test, word2Ind_test = compute_co_occurrence_matrix(test_corpus, window_size=1)
 M_test_reduced = reduce_to_k_dim(M_test, k=2)
 
@@ -237,7 +234,7 @@ print ("-" * 80)
 
 #################################
 # TODO: d)
-def plot_embeddings(M_reduced, word2Ind, words):
+def plot_embeddings(M_reduced, word2Ind, words, save = False, filename = ''):
     """ Plot in a scatterplot the embeddings of the words specified 
         in the list "words".
         NOTE: do not plot all the words listed in M_reduced / word2Ind.
@@ -253,7 +250,25 @@ def plot_embeddings(M_reduced, word2Ind, words):
 
     # ------------------
     # Write your implementation here.
+    xs = []
+    ys = []
 
+    for word in words:
+        [x, y] = M_reduced[word2Ind[word]]
+        xs.append(x)
+        ys.append(y)
+
+    fig, ax = plt.subplots()
+    ax.scatter(xs, ys)
+
+    for word in words:
+        [x, y] = M_reduced[word2Ind[word]]
+        ax.annotate(word, (x, y))
+
+    if save:
+        plt.savefig(filename+'png')
+    else:
+        plt.show()
     # ------------------#
 
 # ---------------------
@@ -272,7 +287,6 @@ words = ['test1', 'test2', 'test3', 'test4', 'test5']
 plot_embeddings(M_reduced_plot_test, word2Ind_plot_test, words)
 
 print ("-" * 80)
-
 
 #################################
 # TODO: e)
@@ -300,7 +314,7 @@ def plot_unnormalized(corpus, words):
     M_co_occurrence, word2Ind_co_occurrence = compute_co_occurrence_matrix(
         corpus)
     M_reduced_co_occurrence = reduce_to_k_dim(M_co_occurrence, k=2)
-    plot_embeddings(M_reduced_co_occurrence, word2Ind_co_occurrence, words)
+    plot_embeddings(M_reduced_co_occurrence, word2Ind_co_occurrence, words, True, 'plot_unnormalized')
 
 
 def plot_normalized(corpus, words):
@@ -310,14 +324,14 @@ def plot_normalized(corpus, words):
     # Rescale (normalize) the rows to make them each of unit-length
     M_lengths = np.linalg.norm(M_reduced_co_occurrence, axis=1)
     M_normalized = M_reduced_co_occurrence / M_lengths[:, np.newaxis] # broadcasting
-    plot_embeddings(M_normalized, word2Ind_co_occurrence, words)
+    plot_embeddings(M_normalized, word2Ind_co_occurrence, words, True, 'plot_normalized')
 
 pl_corpus = read_corpus_pl()
 words = [
     "sztuka", "śpiewaczka", "literatura", "poeta", "obywatel"]
 
-plot_normalized(pl_corpus, words)
-plot_unnormalized(pl_corpus, words)
+plot_normalized(pl_corpus, words) #TODO: describe plot
+plot_unnormalized(pl_corpus, words) #TODO: describe plot
 
 
 #################################
@@ -382,7 +396,7 @@ M_reduced = reduce_to_k_dim(M, k=2)
 
 words = [
     "sztuka", "śpiewaczka", "literatura", "poeta", "artystyczny", "obywatel"]
-plot_embeddings(M_reduced, word2Ind, words)
+plot_embeddings(M_reduced, word2Ind, words, True, 'word2vec_plot')
 
 
 #################################
@@ -391,7 +405,22 @@ plot_embeddings(M_reduced, word2Ind, words)
 # ------------------
 # Write your polysemous word exploration code here.
 
-wv_from_bin_pl.most_similar("stówa")
+def polysemeous_exploration(word):
+    polysemous = wv_from_bin_pl.most_similar(word)
+    print("Polysemeus word exploration - words similar to: " + word)
+    for i in range(10):
+        key, similarity = polysemous[i]
+        print(i, key, similarity)
+
+polysemeous_exploration("stówa")
+polysemeous_exploration("niebo")
+polysemeous_exploration("myszka")
+polysemeous_exploration("klawisz")
+polysemeous_exploration("herbatnik")
+polysemeous_exploration("biegać")
+polysemeous_exploration("kobieta")
+polysemeous_exploration("mężczyzna")
+polysemeous_exploration("medycyna")
 # ------------------
 
 #################################
@@ -409,7 +438,7 @@ w1_w3_dist = wv_from_bin_pl.distance(w1, w3)
 print("Synonyms {}, {} have cosine distance: {}".format(w1, w2, w1_w2_dist))
 print("Antonyms {}, {} have cosine distance: {}".format(w1, w3, w1_w3_dist))
 
-
+quit()
 #################################
 # TODO: d)
 # Solving Analogies with Word Vectors
