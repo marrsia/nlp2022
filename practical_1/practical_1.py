@@ -454,7 +454,7 @@ synonym_antonym_exploration("chudy", "wysmukły", "gruby")
 synonym_antonym_exploration("jasny", "świetlisty", "ciemny")
 # why - the antonyms I used are the most 'basic' words describing a certain quality (for exaple size)
 # the synonym I used is a word that describes that quality but is less commonly used and conveys some additional meanings:
-quit()
+
 #################################
 # TODO: d)
 # Solving Analogies with Word Vectors
@@ -462,9 +462,20 @@ quit()
 
 # ------------------
 # Write your analogy exploration code here.
+print("Analogies exploration")
 pprint.pprint(wv_from_bin_pl.most_similar(
     positive=["syn", "kobieta"], negative=["mezczyzna"]))
 
+print("człowiek:dziecko :: pies:szczenię")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["dziecko", "pies"], negative=["człowiek"]))
+
+print("jasny:biały :: ciemny:czarny")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["biały", "ciemny"], negative=["jasny"]))
+print("duży:pudłko :: mały:pudełko")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["mały", "pudło"], negative=["duży"]))
 
 #################################
 # TODO: e)
@@ -474,33 +485,208 @@ pprint.pprint(wv_from_bin_pl.most_similar(
 
 # ------------------
 
+print("Incorrect analogies exploration")
+print("mężczyna:król :: kobieta:królowa")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["król", "kobieta"], negative=["mezczyzna"]))
 
+print("mężczyna:prawnik :: kobieta:prawniczka")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["prawnik", "kobieta"], negative=["mezczyzna"]))
+
+print("smutek:płacz :: szczęście:śmiech")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["płacz", "szczęście"], negative=["smutek"]))
+
+print("lato:ciepło :: zima:zimno")
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=["ciepło", "zima"], negative=["lato"]))
 #################################
 # TODO: f)
 # Guided Analysis of Bias in Word Vectors
 # Here `positive` indicates the list of words to be similar to and 
 # `negative` indicates the list of words to be most dissimilar from.
 # ------------------
+print("Analysis of Bias in Word Vectors")
 pprint.pprint(wv_from_bin_pl.most_similar(
-    positive=['kobieta', 'szef'], negative=['mezczyzna']))
+    positive=['kobieta', 'szef'], negative=['mezczyzna'])) # getting words not related to boss/not related to female boss
+# szefowa not in top 10
 print()
 pprint.pprint(wv_from_bin_pl.most_similar(
     positive=['mezczyzna', 'prezes'], negative=['kobieta']))
+# prezes means both man and woman who holds the position. here getting words related to prezes as expected
 
 
 #################################
 # TODO: g)
 # Independent Analysis of Bias in Word Vectors 
 # ------------------
+print()
+# correctly getting lekarka
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=['kobieta', 'lekarz'], negative=['mężczyzna']))
 
+# would expect to get lekarz, but getting pielęgniarka somehow?
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=['lekarka', 'mężczyzna'], negative=['kobieta']))
+
+# would expect programistka, getting kompilator
+pprint.pprint(wv_from_bin_pl.most_similar(
+    positive=['kobieta', 'programista'], negative=['mężczyzna']))
+
+# I also incidentally had some related exampled in incorrect analogy exploration
 
 #################################
 # Section 3:
 # English part
 #################################
+def load_word2vec():
+    """ Load Word2Vec Vectors
+        Return:
+            wv_from_bin: All 3 million embeddings, each lengh 300
+    """
+    import gensim.downloader as api
+    wv_from_bin = api.load("word2vec-google-news-300")
+    vocab = list(wv_from_bin.key_to_index.keys())
+    print("Loaded vocab size %i" % len(vocab))
+    return wv_from_bin
+
 wv_from_bin = load_word2vec()
 
 #################################
 # TODO: 
 # Find English equivalent examples for points b) to g).
 #################################
+
+
+#################################
+# TODO: b)
+# Polysemous Words
+# ------------------
+# Write your polysemous word exploration code here.
+
+def polysemeous_exploration_en(word):
+    polysemous = wv_from_bin.most_similar(word)
+    print("Polysemeus word exploration - words similar to: " + word)
+    for i in range(10):
+        key, similarity = polysemous[i]
+        print(i, key, similarity)
+
+
+#polysemeous_exploration_en("mouse") # expected computer and animal, got only computer
+#polysemeous_exploration_en("button") #clothing and tech, got only tech
+polysemeous_exploration_en("right") #both meanings - direction (similar word - left) and correct (similar word - wrong)
+polysemeous_exploration_en("get") #many meanings - come, give, bring
+# ------------------
+
+#################################
+# TODO: c)
+# Synonyms & Antonyms
+# ------------------
+# Write your synonym & antonym exploration code here.
+def synonym_antonym_exploration(w1, w2, w3): # I was able to use the same synonyms, with respect to translations.
+    w1_w2_dist = wv_from_bin.distance(w1, w2)
+    w1_w3_dist = wv_from_bin.distance(w1, w3)
+
+    print("Synonyms {}, {} have cosine distance: {}".format(w1, w2, w1_w2_dist))
+    print("Antonyms {}, {} have cosine distance: {}".format(w1, w3, w1_w3_dist))
+
+synonym_antonym_exploration("happy", "cheerful", "sad")
+
+synonym_antonym_exploration("small", "petite", "big")
+
+synonym_antonym_exploration("skinny", "svelte", "fat")
+
+synonym_antonym_exploration("light", "radiant", "dark")
+# why - the antonyms I used are the most 'basic' words describing a certain quality (for exaple size)
+# the synonym I used is a word that describes that quality but is less commonly used and conveys some additional meanings:
+
+#################################
+# TODO: d)
+# Solving Analogies with Word Vectors
+# ------------------
+
+# ------------------
+# Write your analogy exploration code here.
+print("Analogies exploration")
+print("man:son :: woman:daughter")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["son", "woman"], negative=["man"]))
+
+print("human:child :: dog:puppy")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["child", "dog"], negative=["human"]))
+
+print("light:white :: dark:black")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["white", "dark"], negative=["light"]))
+
+print("man:king :: woman:queen")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["king", "woman"], negative=["man"]))
+
+#################################
+# TODO: e)
+# Incorrect Analogy
+# ------------------
+# Write your incorrect analogy exploration code here.
+
+# ------------------
+
+print("Incorrect analogies exploration")
+
+print("man:lawyer :: woman:lawyer")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["lawyer", "woman"], negative=["man"]))
+
+print("sad:crying :: happy:laughing")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["crying", "happy"], negative=["sad"]))
+
+print("summer:warm :: winter:cold")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=["warm", "winter"], negative=["summer"]))
+#################################
+# TODO: f)
+# Guided Analysis of Bias in Word Vectors
+# Here `positive` indicates the list of words to be similar to and
+# `negative` indicates the list of words to be most dissimilar from.
+# ------------------
+print("Analysis of Bias in Word Vectors")
+print("man:boss ::woman:boss")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['woman', 'boss'], negative=['man'])) # getting words not related to boss/not related to female boss
+# interestingly this producces gibberish
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['man', 'boss'], negative=['woman']))
+
+man_boss_dist = wv_from_bin.distance("boss", "man")
+woman_boss_dist = wv_from_bin.distance("boss", "woman")
+
+print(f'Cosine similarity of boss, man: {man_boss_dist}, cosine similarity of boss, woman: {woman_boss_dist}')
+
+print()
+print("man:chairman ::woman:chairwoman?")
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['man', 'chairman'], negative=['woman']))
+# prezes means both man and woman who holds the position. here getting words related to prezes as expected
+
+
+#################################
+# TODO: g)
+# Independent Analysis of Bias in Word Vectors
+# ------------------
+print()
+# now inccorectly getting gynecologist and nurse as top results
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['woman', 'doctor'], negative=['man']))
+
+# this now works as expected
+# interestingly here we see results like neurosurgeon, surgeon, cardiologist, and before we were getting
+# reults like nurse practitioner, which is absent here
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['doctor', 'man'], negative=['woman']))
+
+# This works as expected now
+pprint.pprint(wv_from_bin.most_similar(
+    positive=['woman', 'programmer'], negative=['man']))
