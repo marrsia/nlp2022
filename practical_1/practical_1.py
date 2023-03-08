@@ -35,7 +35,7 @@ random.seed(0)
 def distinct_words(corpus):
     """ Determine a list of distinct words for the corpus.
         Params:
-            corpus (list of list of strings): corpus of documents
+            corpus (list of lists of strings): corpus of documents
         Return:
             corpus_words (list of strings): list of distinct words across the 
             corpus, sorted (using python 'sorted' function)
